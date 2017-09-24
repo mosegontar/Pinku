@@ -3,7 +3,7 @@ pinku
 
 ``pinku`` is a `Pinboard <https://pinboard.in>`_-to-`Buku <https://github.com/jarun/Buku>`_ importation utility.
 
-``pinku`` is **not** (at least at this time) a syncing utility and works only in only one direction: to import bookmarks *from* Pinboard *into* Buku. If the URL already exists in Buku, the entry is skipped over.
+``pinku`` is **not** (at least at this time) a syncing utility and works in only one direction: to import bookmarks *from* Pinboard *into* Buku. If the URL already exists in Buku, the entry is skipped over.
 
 Installation
 ------------
@@ -17,7 +17,7 @@ Ensure that you have set the ``PINBOARD_API_KEY`` environment variable to your P
 
 Pinku supports all of the filter arguments for the Pinboard API ``/all`` endpoint. Please visit `Pinboard's API documentation <https://pinboard.in/api>`_ to read the details.
 
-**Please note that Pinboard limits API calls to the ``/all`` endpoint to once every five minutes**
+**Please note that Pinboard limits API calls to the /all endpoint to once every five minutes**
 
 Examples
 --------
@@ -44,7 +44,7 @@ Add the first 3 Pinboard bookmarks tagged ``web-dev`` to Buku:
 
 .. code-block::
 
-    pinku -t -web-dev -r 3
+    pinku -t web-dev -r 3
 
 Add all Pinboard bookmarks since September 1, 2017 to Buku:
 
