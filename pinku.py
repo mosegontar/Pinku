@@ -117,12 +117,12 @@ def valid_date(date):
     -------
     Datetime object
     """
+
     try:
         return datetime.datetime.strptime(date, "%Y-%m-%d")
     except ValueError:
         msg = "Not a valid date: '{0}'.\nDates must be in 'Year-month-day' format".format(date)
         raise argparse.ArgumentTypeError(msg)
-
 
 def main():
 
@@ -142,6 +142,7 @@ def main():
                         help="Datetime. Return only bookmarks created after this time.")
     parser.add_argument('--todt', type=valid_date,
                         help="Return only bookmarks created before this time")
+    parser.add_argument('--meta', help="Include a change detection signature for each bookmark")
 
     args = parser.parse_args()
     pinku.add(args)
