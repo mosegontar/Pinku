@@ -36,29 +36,26 @@ class Pinku(object):
 
         filters = {k: v for k, v in vars(filters).items() if v }
 
-        if filters.get('fromdt'):
-            last_update = self._check_update():
-            if last_update > filters['fromdt']:
-                print("No Pinboard bookmarks since {}".format())
-                return
+        if filters.get('fromdt') and not self._check_update(filters['fromdt']):
+            return
 
         records = self._get_pb_bookmarks(**filters)
-        print(records)
-        return
-        added = 0
-        for rec in records:
-            if self.buku.get_rec_id(rec.url) == -1:
-                resp = self._add_to_buku(rec)
-                if resp == -1:
-                    print("Could not add '{}'".format(rec))
-                else:
-                    added += 1
+        self._add_to_buku(records)
 
-        print("Added {} bookmarks to Buku".format(added))
+    def _check_update(self, date):
+        """Check if there are new Pinboard bookmarks since a given date.
 
-    def _check_update(self):
-        """Return most recent time a bookmark was added to Pinboard."""
-        return self.pb.posts.update()
+        Returns
+        -------
+        bool
+            True if there are new bookmarks, else False.
+        """
+
+        last_update = self.pb.posts.update()
+        if date > last_update:
+            print("No Pinboard bookmarks since {}".format(last_update))
+            return False
+        return True
 
     def _get_pb_bookmarks(self, **kwargs):
         """Retrieves Pinboard bookmarks."""
@@ -84,18 +81,29 @@ class Pinku(object):
         tags = ',{},'.format(','.join(tags))
         return tags
 
-    def _add_to_buku(self, rec):
+    def _add_to_buku(self, records):
         """Adds Pinboard bookmarks to Buku Db
 
         Parameters
         ----------
-        rec : Pinboard Bookmark object
-            A new Pinboard bookmark to add to Buku Db.
+        rec : list
+            A list of new Pinboard bookmarks to add to Buku Db.
         """
-        return self.buku.add_rec(rec.url,
-                                 title_in=rec.description,
-                                 tags_in=self._format_tags(rec.tags),
-                                 desc=rec.extended)
+
+        added = 0
+        for rec in records:
+            if self.buku.get_rec_id(rec.url) == -1:
+                resp =  self.buku.add_rec(rec.url,
+                                          title_in=rec.description,
+                                          tags_in=self._format_tags(rec.tags),
+                                          desc=rec.extended)
+                if resp == -1:
+                    print("Could not add '{}'".format(rec))
+                else:
+                    added += 1
+
+        print("Added {} bookmarks to Buku".format(added))
+
 
 def valid_date(date):
     """Convert date string to Datetime object.
