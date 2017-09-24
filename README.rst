@@ -34,11 +34,11 @@ Add your 10 most recent Pinboard bookmarks to Buku:
 
     pinku -r 10
 
-Add all Pinboard bookmarks tagged ``web-dev`` to Buku:
+Add all Pinboard bookmarks tagged ``web-dev`` and ``programming`` (max 3 tags per Pinboard API) to Buku:
 
 .. code-block::
 
-    pinku -t web-dev
+    pinku -t web-dev, programming
 
 Add the first 3 Pinboard bookmarks tagged ``web-dev`` to Buku:
 
