@@ -1,9 +1,13 @@
 pinku
 =====
 
-``pinku`` is a Pinboard-to-Buku importation utility.
+``pinku`` is a `Pinboard <https://pinboard.in>`_-to-`Buku <https://github.com/jarun/Buku>`_ importation utility.
 
 ``pinku`` is **not** (at least at this time) a syncing utility and works only in only one direction: to import bookmarks *from* Pinboard *into* Buku. If the URL already exists in Buku, the entry is skipped over.
+
+Installation
+------------
+``pip install pinku``
 
 Usage
 -----
