@@ -135,9 +135,12 @@ def main():
     pinku = Pinku(pb_api_key)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--tag', nargs='*', help="Filter by up to three tag")
-    parser.add_argument('-s', '--start', help="Offset value")
-    parser.add_argument('-r', '--results', help="Number of results to return")
+    parser.add_argument('-t', '--tag', nargs='*',
+                        help="Filter by up to three tags")
+    parser.add_argument('-s', '--start',
+                        help="Offset value")
+    parser.add_argument('-r', '--results',
+                        help="Number of results to return")
     parser.add_argument('--fromdt', type=valid_date,
                         help="Datetime. Return only bookmarks created after this time.")
     parser.add_argument('--todt', type=valid_date,
