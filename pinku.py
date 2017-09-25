@@ -21,11 +21,13 @@ class Pinku(object):
     pb : a Pinboard API wrapper object
     """
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, filters=None, toread_only=False):
         self.buku = buku.BukuDb()
         self.pb = pinboard.Pinboard(api_key)
+        self.filters = filters
+        self.toread_only = toread_only
 
-    def add(self, filters):
+    def import_bookmarks(self):
         """Get bookmarks from Pinboard and add them to Buku.
 
         Parameters
@@ -34,12 +36,12 @@ class Pinku(object):
             Filters for retrieving Pinboard bookmarks.
         """
 
-        filters = {k: v for k, v in vars(filters).items() if v }
+        if self.filters.get('fromdt'):
+            if not self._check_update(self.filters['fromdt']):
+                return
 
-        if filters.get('fromdt') and not self._check_update(filters['fromdt']):
-            return
+        records = self._get_pb_bookmarks()
 
-        records = self._get_pb_bookmarks(**filters)
         self._add_to_buku(records)
 
     def _check_update(self, date):
@@ -57,10 +59,10 @@ class Pinku(object):
             return False
         return True
 
-    def _get_pb_bookmarks(self, **kwargs):
+    def _get_pb_bookmarks(self):
         """Retrieves Pinboard bookmarks."""
 
-        return self.pb.posts.all(**kwargs)
+        return self.pb.posts.all(**self.filters)
 
     def _format_tags(self, tags):
         """Formats tags to conform to Buku style.
@@ -91,12 +93,18 @@ class Pinku(object):
         """
 
         added = 0
+
         for rec in records:
+
+            if self.toread_only and not rec.toread:
+                continue
+
             if self.buku.get_rec_id(rec.url) == -1:
-                resp =  self.buku.add_rec(rec.url,
-                                          title_in=rec.description,
-                                          tags_in=self._format_tags(rec.tags),
-                                          desc=rec.extended)
+
+                resp = self.buku.add_rec(rec.url,
+                                         title_in=rec.description,
+                                         tags_in=self._format_tags(rec.tags),
+                                         desc=rec.extended)
                 if resp == -1:
                     print("Could not add '{}'".format(rec))
                 else:
@@ -124,6 +132,16 @@ def valid_date(date):
         msg = "Not a valid date: '{0}'.\nDates must be in 'Year-month-day' format".format(date)
         raise argparse.ArgumentTypeError(msg)
 
+
+def create_pinku(api_key, **kwargs):
+    """Creates a Pinku object."""
+
+    toread_only = kwargs.pop('toread', None)
+    filters = {k: v for k, v in kwargs.items() if v }
+
+    return Pinku(api_key, filters=filters, toread_only=toread_only)
+
+
 def main():
 
     pb_api_key = os.environ.get('PINBOARD_API_KEY')
@@ -132,24 +150,28 @@ def main():
         print("PINBOARD_API_KEY environment variable not found")
         return
 
-    pinku = Pinku(pb_api_key)
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--tag', nargs='*',
+    parser.add_argument('--toread', action='store_true', default=False,
+                        help="Only retrieve bookmarks with 'to read' status")
+
+    filters = parser.add_argument_group('filters')
+    filters.add_argument('-t', '--tag', nargs='*',
                         help="Filter by up to three tags")
-    parser.add_argument('-s', '--start',
+    filters.add_argument('-s', '--start',
                         help="Offset value")
-    parser.add_argument('-r', '--results',
+    filters.add_argument('-r', '--results',
                         help="Number of results to return")
-    parser.add_argument('--fromdt', type=valid_date,
+    filters.add_argument('--fromdt', type=valid_date,
                         help="Datetime. Return only bookmarks created after this time.")
-    parser.add_argument('--todt', type=valid_date,
+    filters.add_argument('--todt', type=valid_date,
                         help="Return only bookmarks created before this time")
-    parser.add_argument('--meta', help="Include a change detection signature for each bookmark")
+    filters.add_argument('--meta',
+                        help="Include a change detection signature for each bookmark")
+
 
     args = parser.parse_args()
-    pinku.add(args)
-
+    pinku = create_pinku(pb_api_key, **vars(args))
+    pinku.import_bookmarks()
 
 if __name__ == "__main__":
     main()
