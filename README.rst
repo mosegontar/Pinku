@@ -46,6 +46,12 @@ Add the first 3 Pinboard bookmarks tagged ``web-dev`` to Buku:
 
     pinku -t web-dev -r 3
 
+Add the first 3 Pinboard bookmarks tagged ``history`` that also have a Pinboard "to read" status:
+
+.. code-block::
+
+    pinku -t history -r 3 --toread
+
 Add all Pinboard bookmarks since September 1, 2017 to Buku:
 
 .. code-block::
