@@ -72,7 +72,7 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version='0.1.0',
+    version='0.1.1',
     description=DESCRIPTION,
     long_description=long_description,
     author=AUTHOR,
