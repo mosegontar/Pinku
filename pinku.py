@@ -3,9 +3,13 @@
 import argparse
 import datetime
 import os
+import sys
 
 import buku
 import pinboard
+
+class PinkuArgumentError(Exception):
+    pass
 
 class Pinku(object):
     """Retrieves Pinboard bookmarks adds them to a Buku database.
@@ -64,6 +68,7 @@ class Pinku(object):
 
     def _get_pb_bookmarks(self):
         """Retrieves Pinboard bookmarks."""
+        print("Retrieving Pinboard bookmarks")
 
         return self.pb.posts.all(**self.filters)
 
@@ -148,13 +153,24 @@ def valid_date(date):
 def create_pinku(api_key, **kwargs):
     """Creates a Pinku object."""
 
+    import_all = kwargs.pop('all', None)
+
+    if import_all and filters_present(kwargs):
+        raise PinkuArgumentError("Cannot use `--all` filter alongside another filter")
+
     private_only = kwargs.pop('private', None)
     public_only = kwargs.pop('public', None)
     toread_only = kwargs.pop('toread', None)
     read_only = kwargs.pop('read', None)
+
     filters = {k: v for k, v in kwargs.items() if v }
 
     return Pinku(api_key, filters=filters, private_only=private_only, public_only=public_only, toread_only=toread_only, read_only=read_only)
+
+
+def filters_present(kwargs):
+    """Determine if any filters are present in `kwargs`"""
+    return any((k for k in kwargs.values()))
 
 
 def main():
@@ -164,6 +180,9 @@ def main():
     if not pb_api_key:
         print("PINBOARD_API_KEY environment variable not found")
         return
+
+    if len(sys.argv) == 1:
+        sys.argv.append("--help")
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--private', action='store_true', default=False,
@@ -176,23 +195,30 @@ def main():
                         help="Only retrieve bookmarks without 'to read' status")
 
     filters = parser.add_argument_group('filters')
+    filters.add_argument('-a', '--all', action="store_true",
+                         help="Import all bookmarks. Will not work in conjunction with other filters.")
     filters.add_argument('-t', '--tag', nargs='*',
-                        help="Filter by up to three tags")
+                         help="Filter by up to three tags")
     filters.add_argument('-s', '--start',
-                        help="Offset value")
+                         help="Offset value")
     filters.add_argument('-r', '--results',
-                        help="Number of results to return")
+                         help="Number of results to return")
     filters.add_argument('--fromdt', type=valid_date,
-                        help="Datetime. Return only bookmarks created after this time.")
+                         help="Datetime. Return only bookmarks created after this time.")
     filters.add_argument('--todt', type=valid_date,
-                        help="Return only bookmarks created before this time")
+                         help="Return only bookmarks created before this time")
     filters.add_argument('--meta',
-                        help="Include a change detection signature for each bookmark")
-
+                         help="Include a change detection signature for each bookmark")
 
     args = parser.parse_args()
-    pinku = create_pinku(pb_api_key, **vars(args))
+
+    try:
+        pinku = create_pinku(pb_api_key, **vars(args))
+    except PinkuArgumentError as e:
+        parser.error(e)
+
     pinku.import_bookmarks()
+
 
 if __name__ == "__main__":
     main()
