@@ -7,8 +7,9 @@ import os
 import buku
 import pinboard
 
+
 class Pinku(object):
-    """Retrieves Pinboard bookmarks adds them to a Buku database.
+    """Retrieves Pinboard bookmarks adds them to a buku database.
 
     Parameters
     ----------
@@ -17,7 +18,7 @@ class Pinku(object):
 
     Attributes
     ----------
-    buku : A Buku Db object
+    buku : A buku Db object
     pb : a Pinboard API wrapper object
     """
 
@@ -31,7 +32,7 @@ class Pinku(object):
         self.read_only = read_only
 
     def import_bookmarks(self):
-        """Get bookmarks from Pinboard and add them to Buku.
+        """Get bookmarks from Pinboard and add them to buku.
 
         Parameters
         ----------
@@ -68,7 +69,7 @@ class Pinku(object):
         return self.pb.posts.all(**self.filters)
 
     def _format_tags(self, tags):
-        """Formats tags to conform to Buku style.
+        """Formats tags to conform to buku style.
 
         Tags are wrapped anddelimited by commas.
 
@@ -87,12 +88,12 @@ class Pinku(object):
         return tags
 
     def _add_to_buku(self, records):
-        """Adds Pinboard bookmarks to Buku Db
+        """Adds Pinboard bookmarks to buku Db
 
         Parameters
         ----------
         rec : list
-            A list of new Pinboard bookmarks to add to Buku Db.
+            A list of new Pinboard bookmarks to add to buku Db.
         """
 
         added = 0
@@ -122,7 +123,7 @@ class Pinku(object):
                 else:
                     added += 1
 
-        print("Added {} bookmarks to Buku".format(added))
+        print("Added {} bookmarks to buku".format(added))
 
 
 def valid_date(date):
