@@ -21,11 +21,14 @@ class Pinku(object):
     pb : a Pinboard API wrapper object
     """
 
-    def __init__(self, api_key, filters=None, toread_only=False):
+    def __init__(self, api_key, filters=None, private_only=False, public_only=False, toread_only=False, read_only=False):
         self.buku = buku.BukuDb()
         self.pb = pinboard.Pinboard(api_key)
         self.filters = filters
+        self.private_only = private_only
+        self.public_only = public_only
         self.toread_only = toread_only
+        self.read_only = read_only
 
     def import_bookmarks(self):
         """Get bookmarks from Pinboard and add them to Buku.
@@ -96,7 +99,16 @@ class Pinku(object):
 
         for rec in records:
 
+            if self.private_only and rec.shared:
+                continue
+
+            if self.public_only and not rec.shared:
+                continue
+
             if self.toread_only and not rec.toread:
+                continue
+
+            if self.read_only and rec.toread:
                 continue
 
             if self.buku.get_rec_id(rec.url) == -1:
@@ -136,10 +148,13 @@ def valid_date(date):
 def create_pinku(api_key, **kwargs):
     """Creates a Pinku object."""
 
+    private_only = kwargs.pop('private', None)
+    public_only = kwargs.pop('public', None)
     toread_only = kwargs.pop('toread', None)
+    read_only = kwargs.pop('read', None)
     filters = {k: v for k, v in kwargs.items() if v }
 
-    return Pinku(api_key, filters=filters, toread_only=toread_only)
+    return Pinku(api_key, filters=filters, private_only=private_only, public_only=public_only, toread_only=toread_only, read_only=read_only)
 
 
 def main():
@@ -151,8 +166,14 @@ def main():
         return
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--private', action='store_true', default=False,
+                        help="Only retrieve bookmarks with 'shared' status")
+    parser.add_argument('--public', action='store_true', default=False,
+                        help="Only retrieve bookmarks without 'shared' status")
     parser.add_argument('--toread', action='store_true', default=False,
                         help="Only retrieve bookmarks with 'to read' status")
+    parser.add_argument('--read', action='store_true', default=False,
+                        help="Only retrieve bookmarks without 'to read' status")
 
     filters = parser.add_argument_group('filters')
     filters.add_argument('-t', '--tag', nargs='*',
