@@ -26,7 +26,7 @@ Add *all* Pinboard bookmarks to Buku:
 
 .. code-block::
 
-    pinku
+    pinku -a
 
 Add your 10 most recent Pinboard bookmarks to Buku:
 
