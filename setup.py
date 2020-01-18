@@ -13,7 +13,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'Pinku'
-DESCRIPTION = 'Pinboard-to-Buku importation utility'
+DESCRIPTION = 'Pinboard-to-buku importation utility'
 URL = 'https://github.com/mosegontar/pinku'
 EMAIL = 'mosegontar@gmail.com'
 AUTHOR = 'Alexander M. Gontar'
